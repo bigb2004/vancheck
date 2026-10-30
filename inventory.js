@@ -13,3 +13,10 @@ export function formatSavedAt(value,locale=undefined,timeZone=undefined){
   const time=d.toLocaleTimeString(locale,{hour:'numeric',minute:'2-digit',second:'2-digit',...(timeZone?{timeZone}:{})});
   return `Saved ✓ ${time}`;
 }
+export function addEquipmentToJob(job,tool){
+  if(!job||!tool||job.items?.[tool.id])return job;
+  return {...job,items:{...job.items,[tool.id]:{...tool,qty:tool.qty||1,returnedQty:0,status:'out',removedAt:Date.now()}}};
+}
+export function completedToolSnapshot(job){
+  return Object.values(job?.items||{}).map(i=>({id:i.id,name:i.name,owner:i.owner,level:i.level,qty:i.qty||1,returnedQty:i.returnedQty??0,brand:i.brand||'',finalStatus:i.status}));
+}
