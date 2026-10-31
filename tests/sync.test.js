@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {buildSyncSnapshot,applySyncSnapshot,chooseSyncAction} from '../sync.js';
+import {buildSyncSnapshot,applySyncSnapshot,chooseSyncAction,VanCheckSyncClient} from '../sync.js';
 
 test('buildSyncSnapshot produces a versioned portable state document',()=>{
  const state={inventory:[{id:'xm2',name:'XM2'}],active:{id:'job-1'},history:[{id:'old'}],retention:30,lastSavedAt:123};
@@ -34,4 +34,15 @@ test('sync reconciliation keeps the newest copy',()=>{
  assert.equal(chooseSyncAction({lastSavedAt:200},{version:1,updatedAt:100}),'push');
  assert.equal(chooseSyncAction({lastSavedAt:100},{version:1,updatedAt:200}),'pull');
  assert.equal(chooseSyncAction({lastSavedAt:200},{version:1,updatedAt:200}),'none');
+});
+
+test('VanCheck sync can use Safari first-party Jax cookie credentials',async()=>{
+ let options;
+ const client=new VanCheckSyncClient({
+  baseUrl:'https://jax.example',
+  fetchImpl:async(_url,opts)=>{options=opts;return {status:404,ok:false}}
+ });
+ assert.equal(await client.pull(),null);
+ assert.equal(options.credentials,'include');
+ assert.equal(options.headers.authorization,undefined);
 });
