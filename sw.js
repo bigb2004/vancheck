@@ -1,4 +1,4 @@
-const CACHE='vancheck-v1.5';
+const CACHE='vancheck-v1.6';
 const ASSETS=['./','./index.html','./style.css','./app.js','./inventory.js','./sync.js','./jax-sync-bridge.js','./manifest.webmanifest','./icon.svg'];
 const FRESH_PATHS=new Set(['/sync.js','/jax-sync-bridge.js']);
 
