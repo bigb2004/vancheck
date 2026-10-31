@@ -36,13 +36,7 @@ test('sync reconciliation keeps the newest copy',()=>{
  assert.equal(chooseSyncAction({lastSavedAt:200},{version:1,updatedAt:200}),'none');
 });
 
-test('VanCheck sync can use Safari first-party Jax cookie credentials',async()=>{
- let options;
- const client=new VanCheckSyncClient({
-  baseUrl:'https://jax.example',
-  fetchImpl:async(_url,opts)=>{options=opts;return {status:404,ok:false}}
- });
- assert.equal(await client.pull(),null);
- assert.equal(options.credentials,'include');
- assert.equal(options.headers.authorization,undefined);
+test('VanCheck sync reports unauthorized tokens so the bridge can reconnect',async()=>{
+ const client=new VanCheckSyncClient({baseUrl:'https://jax.example',token:'stale',fetchImpl:async()=>({status:401,ok:false})});
+ await assert.rejects(client.pull(),err=>err.status===401 && /401/.test(err.message));
 });
