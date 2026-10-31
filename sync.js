@@ -23,6 +23,14 @@ export function applySyncSnapshot(local={},snapshot={}){
  };
 }
 
+export function chooseSyncAction(local={},remote=null){
+ if(!remote)return 'push';
+ const localAt=Number(local.lastSavedAt)||0,remoteAt=Number(remote.updatedAt)||0;
+ if(localAt>remoteAt)return 'push';
+ if(remoteAt>localAt)return 'pull';
+ return 'none';
+}
+
 export class VanCheckSyncClient{
  constructor({baseUrl,token,fetchImpl=fetch}){this.baseUrl=String(baseUrl||'').replace(/\/$/,'');this.token=token;this.fetch=fetchImpl}
  headers(){return {'content-type':'application/json',...(this.token?{authorization:`Bearer ${this.token}`}:{})}}
