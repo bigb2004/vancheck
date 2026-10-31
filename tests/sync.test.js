@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {buildSyncSnapshot,applySyncSnapshot} from '../sync.js';
+import {buildSyncSnapshot,applySyncSnapshot,chooseSyncAction} from '../sync.js';
 
 test('buildSyncSnapshot produces a versioned portable state document',()=>{
  const state={inventory:[{id:'xm2',name:'XM2'}],active:{id:'job-1'},history:[{id:'old'}],retention:30,lastSavedAt:123};
@@ -24,4 +24,14 @@ test('applySyncSnapshot keeps only supported state and normalizes bad values',()
 
 test('applySyncSnapshot rejects unsupported versions',()=>{
  assert.throws(()=>applySyncSnapshot({}, {version:99}),/Unsupported VanCheck sync version/);
+});
+
+test('sync reconciliation pushes local state when server is empty',()=>{
+ assert.equal(chooseSyncAction({lastSavedAt:100},null),'push');
+});
+
+test('sync reconciliation keeps the newest copy',()=>{
+ assert.equal(chooseSyncAction({lastSavedAt:200},{version:1,updatedAt:100}),'push');
+ assert.equal(chooseSyncAction({lastSavedAt:100},{version:1,updatedAt:200}),'pull');
+ assert.equal(chooseSyncAction({lastSavedAt:200},{version:1,updatedAt:200}),'none');
 });
