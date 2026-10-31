@@ -31,9 +31,10 @@ export function chooseSyncAction(local={},remote=null){
  return 'none';
 }
 
+function syncError(message,status){const e=new Error(`${message}: ${status}`);e.status=status;return e}
 export class VanCheckSyncClient{
  constructor({baseUrl,token,fetchImpl=fetch}){this.baseUrl=String(baseUrl||'').replace(/\/$/,'');this.token=token;this.fetch=fetchImpl}
  headers(){return {'content-type':'application/json',...(this.token?{authorization:`Bearer ${this.token}`}:{})}}
- async pull(){const r=await this.fetch(`${this.baseUrl}/v1/vancheck/state`,{headers:this.headers(),credentials:'include'});if(r.status===404)return null;if(!r.ok)throw new Error(`VanCheck sync pull failed: ${r.status}`);return r.json()}
- async push(snapshot){const r=await this.fetch(`${this.baseUrl}/v1/vancheck/state`,{method:'PUT',headers:this.headers(),credentials:'include',body:JSON.stringify(snapshot)});if(!r.ok)throw new Error(`VanCheck sync push failed: ${r.status}`);return r.json()}
+ async pull(){const r=await this.fetch(`${this.baseUrl}/v1/vancheck/state`,{headers:this.headers()});if(r.status===404)return null;if(!r.ok)throw syncError('VanCheck sync pull failed',r.status);return r.json()}
+ async push(snapshot){const r=await this.fetch(`${this.baseUrl}/v1/vancheck/state`,{method:'PUT',headers:this.headers(),body:JSON.stringify(snapshot)});if(!r.ok)throw syncError('VanCheck sync push failed',r.status);return r.json()}
 }
